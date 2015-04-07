@@ -1,0 +1,12 @@
+.palette{
+    height:100px;
+    width:75px;
+    border: 2px solid black;
+    margin: 2px;
+    vertical-align:middle;
+    background:white;
+    display:inline-block;
+}
+.defs-mathjax{
+    display:none;
+}
