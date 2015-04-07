@@ -1,3 +1,6 @@
+# Js files (Using coffeescript)
+*.js
+
 # Logs
 logs
 *.log
