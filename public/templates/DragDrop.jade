@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    // Page css
+    link(href='/css/DragDrop.css', rel='stylesheet')
+    // Page js
+    script(src='js/DragDrop.js')
+    // JQuery
+    script(src='https://code.jquery.com/jquery-1.10.2.js')
+    // JQuery UI
+    script(src='https://code.jquery.com/ui/1.11.4/jquery-ui.js')
+    // MathJax
+    script(src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full')
+  body
+    .defs-mathjax.
+      $$
+        \def\Mark#1#2{\class{obox bbox-#1}{{\bbox[border:0px]{#2}}}}
+      $$
+    .palette-container
+    br
+    .expression
