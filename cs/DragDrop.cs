@@ -79,7 +79,7 @@ class Expression extends BaseExpression
       .getExpression() for i in [1..@numChildren] by 1
     )
     #Set their replace methods
-    @setChild(child,@numChildren - i) for child, i in @children
+    @setChild(@children[i - 1],i) for i in [@numChildren..1] by -1
     @children[0] = null
 
   #is there an nth child in the expression?
