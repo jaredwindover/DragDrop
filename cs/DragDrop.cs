@@ -1,60 +1,94 @@
+(($) ->
+  $.fn.getExpressions = ->
+    #for all matching selectors
+    this.map (ind,elem) ->
+      #find the bbox-id class
+      classes = elem.className.split /\s+/
+      idClass = classes.filter((s) -> s.indexOf('bbox-') == 0)[0]
+      #strip the id
+      id = parseInt idClass[5..]
+      #find the first MathJax-Color-xxx id element after
+      dropDiv = $ elem
+        .find '[id^="MathJax-Color"]:first'
+      #set the expressionid in this element
+      dropDiv.attr('data-expressionId',id)
+      #return the dom element
+      dropDiv.get()
+) jQuery
+
 ExpressionBuilder =
   #Go from an expression id back to the expression
   ExpressionMap: []
   #Make sure we give unique id's
   counter: 0
   #Build an Expression
-  getExpression: (expression) ->
-    count = @counter
+  getExpression: (expression, link) ->
+    count = @counter #increment after so that child expressions have unique ids
     @counter++
-    if expression? then res  = new Expression expression, count
+    #new expression from string
+    console.log(link)
+    if expression? then res  = new Expression expression, link, count
+    #blank expression
     else res = new BlankExpression count
+    #put expression into the map
     @ExpressionMap[count] = res
     return res
   #After mathjax has generated the html, prepare droppable expressions
+   
   prepareDrops: ->
+    #clear pointer events so only the right ones happen
     $ '.MathJax'
     .find '*'
     .css 'pointer-events', 'none'
+    #fix up drops
     $ '.drop'
-    .each (ind,elem) ->
-      classes = elem.className.split /\s+/
-      idClass = classes.filter((s) -> s.indexOf('bbox-') == 0)[0]
-      id = parseInt idClass[5..]
-      dropDiv = $ '.' + idClass
-        .find '[id^="MathJax-Color"]:first'
-        .css 'pointer-events','visiblePainted'
-        .addClass 'dropbox'
-        .droppable
-          tolerance : 'pointer'
-          drop: ((id,event,ui) ->
-            curExp = ExpressionBuilder.ExpressionMap[id]
-            newExp = ui.draggable.data 'expression'
-              .expression
-            newExp = ExpressionBuilder.getExpression(newExp)
-            curExp.replace newExp
-            $ '.expression'
-              .html "$$#{mainExpression.renderDynamic()}$$"
-            MathJax.Hub.Queue(
-              ['Typeset',MathJax.Hub, $('body').get()],
-              ['prepareDrops',ExpressionBuilder],
-              makeDragDrop)
-          ).bind(null, id)
-          
+    .getExpressions()
+    #add pointer events back
+    .css 'pointer-events', 'visiblePainted'
+    .addClass 'dropbox'
+    .each (id,elem) ->
+      #make each one droppable
+      $(elem).droppable
+        #just requires the mouse in the box
+        tolerance : 'pointer'
+        #function to call on drop
+        drop: ((id,event,ui) ->
+          #identify current expression by id
+          curExp = ExpressionBuilder.ExpressionMap[id]
+          #identify palette's expression
+          newExp = ui.draggable.data 'expression'
+          #copy palette expression
+          newExp = ExpressionBuilder.getExpression(
+            newExp.expression,
+            newExp.link
+          )
+          #replace with new expression
+          curExp.replace newExp
+          prepareMain()
+          #bind expressionid to id field in function
+          ).bind(null, $(this).attr('data-expressionid'))
+  prepareLinks: ->
+    $ '.exp'
+    .getExpressions()
+    .css 'pointer-events', 'visiblePainted'
+    .addClass 'explink'
+    .each (id,elem) ->
+      id = $(this).attr('data-expressionid')
+      link = ExpressionBuilder.ExpressionMap[id].link
+      $ elem
+      .on 'click', ((link) ->
+        console.log('Hi there')
+        if link? then window.open link
+      ).bind(null,link)
+        
 #virtual
 class BaseExpression
-  #virtual
-  constructor: ->
-  #virtual
-  renderStatic: ->
-  #virtual
-  renderDynamic: ->
-  makePalette: ->
-    $(
-      "<div class='palette'>
+  makePalette: () ->
+    $ "<div class='palette'>
       $$#{@renderStatic()}$$
       </div>"
-    ).data('expression', @)
+    .data 
+      'expression': @
 
 
 class BlankExpression extends BaseExpression
@@ -67,7 +101,7 @@ class BlankExpression extends BaseExpression
     "\\Mark{#{@id} drop}{\\bbox[border:1px solid black]{\\phantom{x}}}"
 
 class Expression extends BaseExpression
-  constructor: (@expression,@id) ->
+  constructor: (@expression,@link,@id) ->
     #count children in expression
     @numChildren = 1
     @numChildren++ while @hasn(@numChildren)
@@ -112,33 +146,61 @@ class Expression extends BaseExpression
     res = @expression
     for i in [@numChildren..1] by -1
       res = res.replace('#' + i,@children[i].renderDynamic())
-    return "{\\Mark{#{@id}}{#{res}}}"
+    return "{\\Mark{#{@id} exp}{#{res}}}"
 
-
-frac  = '{\\frac{#1}{#2}}'
-add   = '{#1+#2}'
-sqrt  = '{\\sqrt{#1}}'
-exp   = '{#1^#2}'
-sub   = '{#1 - #2}'
-mult  = '{#1#2}'
-sum   = '{\\sum_{#1}^{#2}{#3}}'
-paren = '{\\left({#1}\\right)}'     
-equal = '{{#1}={#2}}'
-x     = '{x}'
-y     = '{y}'
-a     = '{a}'
-b     = '{b}'
-neg   = '{-{#1}}'
-pm    = '{{#1}\\pm{#2}}'
-blank = null
+frac  =
+  exp : '{\\frac{#1}{#2}}',
+  link : 'https://www.google.com/?q=fraction'
+add   =
+  exp : '{#1+#2}'
+  link : 'https://www.google.com/?q=addition'
+sqrt  =
+  exp : '{\\sqrt{#1}}'
+  link : 'https://www.google.com/?q=squareroot'
+exp   =
+  exp : '{#1^#2}'
+  link : 'https://www.google.com/?q=exponentiation'
+sub   =
+  exp : '{#1 - #2}'
+  link : 'https://www.google.com/?q=subtraction'
+mult  =
+  exp : '{#1#2}'
+  link : 'https://www.google.com/?q=multiplication'
+sum   =
+  exp : '{\\sum_{#1}^{#2}{#3}}'
+  link : 'https://www.google.com/?q=sum'
+paren =
+  exp : '{\\left({#1}\\right)}'     
+  link : 'https://www.google.com/?q=parentheses'
+equal =
+  exp : '{{#1}={#2}}'
+  link : 'https://www.google.com/?q=equal'
+x     =
+  exp : '{x}'
+  link : null
+y     =
+  exp : '{y}'
+  link : null
+a     =
+  exp : '{a}'
+  link : null
+b     =
+  exp : '{b}'
+  link : null
+neg   =
+  exp : '{-{#1}}'
+  link : 'https://www.google.com/?q=negative'
+pm    =
+  exp : '{{#1}\\pm{#2}}'
+  link : 'https://www.google.com/?q=plusminus'
 
 palettes = (
   ExpressionBuilder
-    .getExpression e
+    .getExpression e.exp, e.link
     .makePalette()  for e in [
       x, y, a, b,
       neg, sqrt,
-      equal, paren, add, sub, pm, mult, frac,
+      equal, paren, add, sub, pm, mult, frac, exp,
       sum]
 )
 
@@ -147,22 +209,24 @@ mainExpression = ExpressionBuilder
   .getExpression main
 
 
-makeDragDrop = ->
+makeDraggable = ->
     $ '.palette'
       .draggable
         stack  : '.palette',
         revert : true
 
+prepareMain = ->
+  $ '.expression'
+  .html "$$#{mainExpression.renderDynamic()}$$"
+  MathJax.Hub.Queue(
+    ['Typeset',MathJax.Hub, $('body').get()],
+    ['prepareDrops',ExpressionBuilder],
+    ['prepareLinks',ExpressionBuilder],
+    makeDraggable)
+
 
 $ document
   .ready ->
-    makeDragDrop
     $ '.palette-container'
       .append palettes
-    $ '.expression'
-      .html "$$#{mainExpression.renderDynamic()}$$"
-    MathJax.Hub.Queue(
-      ['Typeset',MathJax.Hub,$('body').get()],
-      ['prepareDrops',ExpressionBuilder],
-      makeDragDrop
-    )
+    prepareMain()

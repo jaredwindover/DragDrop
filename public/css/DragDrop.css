@@ -10,3 +10,11 @@
 .defs-mathjax{
     display:none;
 }
+
+.explink:hover{
+    background-color:lightgreen;
+}
+
+.dropbox:hover{
+    background-color:lightpink;
+}
