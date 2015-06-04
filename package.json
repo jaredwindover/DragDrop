@@ -1,22 +1,23 @@
 {
-  "name": "dragdrop",
-  "version": "1.0.0",
-  "description": "Drag and drop equation editing",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jaredwindover/DragDrop.git"
-  },
-  "author": "Jared Windover",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/jaredwindover/DragDrop/issues"
-  },
-  "homepage": "https://github.com/jaredwindover/DragDrop#readme",
-  "dependencies": {
-    "http-server": "^0.8.0"
-  }
+    "name": "dragdrop",
+    "version": "1.0.0",
+    "description": "Drag and drop equation editing",
+    "main": "index.js",
+    "scripts": {
+	"test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node_modules/http-server/bin/http-server public/"
+    },
+    "repository": {
+	"type": "git",
+	"url": "git+https://github.com/jaredwindover/DragDrop.git"
+    },
+    "author": "Jared Windover",
+    "license": "ISC",
+    "bugs": {
+	"url": "https://github.com/jaredwindover/DragDrop/issues"
+    },
+    "homepage": "https://github.com/jaredwindover/DragDrop#readme",
+    "dependencies": {
+	"http-server": "^0.8.0"
+    }
 }
