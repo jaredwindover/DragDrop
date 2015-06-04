@@ -5,6 +5,10 @@
     "main": "index.js",
     "scripts": {
 	"test": "echo \"Error: no test specified\" && exit 1",
+	"preinstall": "",
+	"postinstall": "npm run jade && npm run coffee",
+	"jade": "node node_modules/jade/bin/jade.js templates/ -o public/",
+	"coffee": "node_modules/coffee-script/bin/coffee -o public/js/ -c cs/DragDrop.cs",
 	"start": "node_modules/http-server/bin/http-server public/"
     },
     "repository": {
@@ -18,7 +22,9 @@
     },
     "homepage": "https://github.com/jaredwindover/DragDrop#readme",
     "dependencies": {
-	"http-server": "^0.8.0"
+	"coffee-script": "^1.9.3",
+	"http-server": "^0.8.0",
+	"jade": "^1.10.0"
     },
     "engines": {
 	"node": "0.12.4"
