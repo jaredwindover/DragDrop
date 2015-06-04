@@ -31,3 +31,6 @@ node_modules
 
 #Automatically generated Procfile
 Procfile
+
+#Ugly html
+public/*.html
